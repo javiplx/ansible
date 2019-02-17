@@ -197,8 +197,7 @@ class GalaxyCLI(CLI):
             for path_file in path_files:
                 gr = GalaxyRole(self.galaxy, path_file, path=path)
                 if gr.metadata:
-                    roles_list.append( ( gr.name , gr.install_info.get("version", None) ) )
-                    display.display("- %s - %s" % ( gr.name , gr.install_info.get("version", None) ) )
+                    roles_list.append( gr )
         for w in warnings:
             display.warning(w)
         if not path_found:
@@ -389,7 +388,7 @@ class GalaxyCLI(CLI):
                 role = RoleRequirement.role_yaml_parse(rname.strip())
                 roles_left.append(GalaxyRole(self.galaxy, **role))
 
-        installed_roles = [ name for (name,version) in self._list_installed_roles() ]
+        installed_roles = [ gr.name for gr in self._list_installed_roles() ]
         for role in roles_left:
             # only process roles in roles files when names matches if given
             if role_file and context.CLIARGS['args'] and role.name not in context.CLIARGS['args']:
@@ -517,28 +516,8 @@ class GalaxyCLI(CLI):
                 display.display("- the role %s was not found" % name)
         else:
             # show all valid roles in the roles_path directory
-            roles_path = context.CLIARGS['roles_path']
-            path_found = False
-            warnings = []
-            for path in roles_path:
-                role_path = os.path.expanduser(path)
-                if not os.path.exists(role_path):
-                    warnings.append("- the configured path %s does not exist." % role_path)
-                    continue
-                elif not os.path.isdir(role_path):
-                    warnings.append("- the configured path %s, exists, but it is not a directory." % role_path)
-                    continue
-                display.display('# %s' % role_path)
-                path_files = os.listdir(role_path)
-                path_found = True
-                for path_file in path_files:
-                    gr = GalaxyRole(self.galaxy, path_file, path=path)
-                    if gr.metadata:
-                        _display_role(gr)
-            for w in warnings:
-                display.warning(w)
-            if not path_found:
-                raise AnsibleOptionsError("- None of the provided paths was usable. Please specify a valid path with --roles-path")
+            for gr in self._list_installed_roles():
+                _display_role(gr)
         return 0
 
     def execute_search(self):
