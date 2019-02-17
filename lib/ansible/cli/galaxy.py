@@ -395,10 +395,6 @@ class GalaxyCLI(CLI):
                 display.vvv('Skipping role %s' % role.name)
                 continue
 
-            if role.name in installed_roles and not force :
-                display.display('- %s is already installed, skipping.' % str(role))
-                continue
-
             display.vvv('Processing role %s ' % role.name)
 
             # query the galaxy API for the role data
@@ -440,7 +436,7 @@ class GalaxyCLI(CLI):
                             # we know we can skip this, as it's not going to
                             # be found on galaxy.ansible.com
                             continue
-                        if dep_role.install_info is None:
+                        if dep_role.install_info is None and not ( role.name in installed_roles and not force ) :
                             if dep_role not in roles_left:
                                 display.display('- adding dependency: %s' % to_text(dep_role))
                                 roles_left.append(dep_role)
