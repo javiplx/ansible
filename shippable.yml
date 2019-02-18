@@ -144,4 +144,3 @@ branches:
 build:
   ci:
     - test/utils/shippable/timing.sh test/utils/shippable/shippable.sh $T
-
